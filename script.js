@@ -152,9 +152,8 @@ function buildOtherPaths() {
 }
 
 function draw() {
-    // Subtract a larger value to ensure the maze is smaller than the container.
-    const containerWidth = mazeWrapper.clientWidth - 40; 
-    const containerHeight = mazeWrapper.clientHeight - 40;
+    const containerWidth = mazeWrapper.clientWidth - 20;
+    const containerHeight = mazeWrapper.clientHeight - 20;
     cellSize = Math.floor(Math.min(containerWidth / gridWidth, containerHeight / gridHeight));
     
     gridEl.innerHTML = drawGrid();
