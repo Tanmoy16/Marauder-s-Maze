@@ -181,8 +181,17 @@ function initializeTurtle() {
 }
 
 function positionTurtle() {
-    const top = (turtle.y * cellSize) + (cellSize / 2) - 12.5;
-    const left = (turtle.x * cellSize) + (cellSize / 2) - 12.5;
+    // Get the exact position and dimensions of the SVG element
+    const svgRect = svgEl.getBoundingClientRect();
+    const mazeWrapperRect = mazeWrapper.getBoundingClientRect();
+
+    // Calculate the offset of the SVG from the top-left of the wrapper
+    const offsetX = svgRect.left - mazeWrapperRect.left;
+    const offsetY = svgRect.top - mazeWrapperRect.top;
+
+    // Position the turtle relative to the maze, plus the offset
+    const top = offsetY + (turtle.y * cellSize) + (cellSize / 2) - 12.5;
+    const left = offsetX + (turtle.x * cellSize) + (cellSize / 2) - 12.5;
 
     turtleEl.style.left = `${left}px`;
     turtleEl.style.top = `${top}px`;
