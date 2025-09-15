@@ -1,0 +1,52 @@
+body {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #121212;
+    color: #00ff00;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: a;
+}
+
+header {
+    text-align: center;
+    padding: 10px;
+    background-color: #000;
+    border-bottom: 2px solid #00ff00;
+}
+
+#game-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+#maze-wrapper {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    background: #000;
+    position: relative;
+}
+
+svg {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    background: var(--maze-bg-color);
+}
+
+.turtle {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-left: 12.5px solid transparent;
+    border-right: 12.5px solid transparent;
+    border-bottom: 25px solid cyan;
+    z-index: 10;
+    transition: transform 0.2s ease-in-out;
+}

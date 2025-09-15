@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Potter Nova: The Maze Challenge</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Potter Nova: The Maze Challenge</h1>
+    </header>
+
+    <main id="game-container">
+        <div id="maze-wrapper">
+            <svg 
+              viewBox="0 0 1000 1000" 
+              width="1000" 
+              height="1000" 
+              role="img">
+              <title>A square maze.</title>
+              
+              <style> 
+                g {  
+                  --cell-size: 50px;
+                  --stroke-width: 10px;
+                }
+                .grid-line {
+                  fill: none;
+                  stroke: var(--maze-stroke-color);
+                  stroke-width: var(--stroke-width);
+                  stroke-linecap: square;
+                }
+                .maze-path {
+                  fill: none;
+                  stroke: white;
+                  stroke-width: calc(var(--cell-size) - var(--stroke-width));
+                  stroke-linecap: square;
+                }
+              </style>
+            
+              <g class="grid"></g>
+              <g class="pattern"></g>
+            </svg>
+        </div>
+        
+        <div id="terminal-wrapper">
+            <div id="terminal-output">
+                Welcome to Potter Nova! Guide the turtle to the exit.
+            </div>
+            <input type="text" id="terminal-input" placeholder="Enter commands here...">
+        </div>
+    </main>
+
+    <script src="script.js" type="module"></script>
+</body>
+</html>
