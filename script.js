@@ -18,6 +18,7 @@ let gridData = buildFreshGrid();
 let turtle = { x: 0, y: 0, direction: 'north' };
 let turtleEl;
 let cellSize;
+let endPoint = null;
 
 function drawGrid() {
     let gridMarkup = '';
@@ -87,10 +88,23 @@ function refreshState() {
     markPointAsTaken(mainPathPoints.at(-1));
     otherPaths = [];
     failedCount = 0;
+    endPoint = { x: randomInt(0, gridWidth - 1), y: 0 };
+}
+
+function drawEndPoint() {
+    if (!endPoint) return '';
+    
+    const markerSize = cellSize * 0.7;
+    const offset = (cellSize - markerSize) / 2;
+    const x = endPoint.x * cellSize + offset;
+    const y = endPoint.y * cellSize + offset;
+    
+    return `<rect class="end-point" x="${x}" y="${y}" width="${markerSize}" height="${markerSize}" />`;
 }
 
 function drawLines() {
     let markup = otherPaths.map(drawLine).join('') + drawLine(mainPathPoints, 'main');
+    markup += drawEndPoint();
     patternEl.innerHTML = markup;
 }
 
@@ -109,8 +123,7 @@ function buildMainPath() {
         } else {
             mainPathPoints.push(nextPoint);
             markPointAsTaken(nextPoint);
-            if (nextPoint.y === 0) {
-                mainPathPoints.push({ x: nextPoint.x, y: -1 });
+            if (nextPoint.x === endPoint.x && nextPoint.y === endPoint.y) {
                 clearInterval(interval);
                 buildOtherPaths();
             }
@@ -163,6 +176,9 @@ function draw() {
     svgEl.setAttribute('width', mazeWidth);
     svgEl.setAttribute('height', mazeHeight);
     patternEl.innerHTML = '';
+    if (turtleEl) {
+      turtleEl.style.display = 'none';
+    }
     clearInterval(interval);
     buildMainPath();
 }
@@ -173,6 +189,7 @@ function initializeTurtle() {
         turtleEl.classList.add('turtle');
         mazeWrapper.appendChild(turtleEl);
     }
+    turtleEl.style.display = 'block';
     const startPoint = mainPathPoints[1];
     turtle.x = startPoint.x;
     turtle.y = startPoint.y;
@@ -181,15 +198,12 @@ function initializeTurtle() {
 }
 
 function positionTurtle() {
-    // Get the exact position and dimensions of the SVG element
     const svgRect = svgEl.getBoundingClientRect();
     const mazeWrapperRect = mazeWrapper.getBoundingClientRect();
 
-    // Calculate the offset of the SVG from the top-left of the wrapper
     const offsetX = svgRect.left - mazeWrapperRect.left;
     const offsetY = svgRect.top - mazeWrapperRect.top;
 
-    // Position the turtle relative to the maze, plus the offset
     const top = offsetY + (turtle.y * cellSize) + (cellSize / 2) - 12.5;
     const left = offsetX + (turtle.x * cellSize) + (cellSize / 2) - 12.5;
 
@@ -206,26 +220,46 @@ function positionTurtle() {
     turtleEl.style.transform = `rotate(${rotation}deg)`;
 }
 
+function isPathConnected(p1, p2) {
+    const allPaths = [mainPathPoints, ...otherPaths];
+
+    for (const path of allPaths) {
+        for (let i = 0; i < path.length - 1; i++) {
+            const currentPoint = path[i];
+            const nextPoint = path[i + 1];
+
+            if ((currentPoint.x === p1.x && currentPoint.y === p1.y && nextPoint.x === p2.x && nextPoint.y === p2.y) ||
+                (currentPoint.x === p2.x && currentPoint.y === p2.y && nextPoint.x === p1.x && nextPoint.y === p1.y)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 function moveTurtle(direction) {
     let newX = turtle.x;
     let newY = turtle.y;
 
     switch (direction) {
         case 'north': newY--; break;
-        case 'east': newX++; break;
+        case 'east':  newX++; break;
         case 'south': newY++; break;
-        case 'west': newX--; break;
+        case 'west':  newX--; break;
     }
     
-    if (newX >= 0 && newX < gridWidth && newY >= 0 && newY < gridHeight) {
-        if (gridData[newY][newX] === 1) {
-            turtle.x = newX;
-            turtle.y = newY;
-            turtle.direction = direction;
-            positionTurtle();
+    if (isPathConnected({x: turtle.x, y: turtle.y}, {x: newX, y: newY})) {
+        turtle.x = newX;
+        turtle.y = newY;
+        turtle.direction = direction;
+        positionTurtle();
+
+        if (turtle.x === endPoint.x && turtle.y === endPoint.y) {
+            setTimeout(() => {
+                alert("🎉 Congratulations! You've reached the exit!");
+                draw();
+            }, 200);
         }
-    } else if (newY < 0 && turtle.y === 0) {
-        alert("🎉 Congratulations! You've solved the maze!");
     }
 }
 
