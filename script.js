@@ -5,7 +5,7 @@ const patternEl = document.querySelector('.pattern');
 const gridEl = document.querySelector('.grid');
 const mazeWrapper = document.getElementById('maze-wrapper');
 
-const gridWidth = 20;
+const gridWidth =20;
 const gridHeight = 20;
 const splittingChance = 0.1;
 const animationSpeed = 20;
