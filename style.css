@@ -50,3 +50,9 @@ svg {
     z-index: 10;
     transition: transform 0.2s ease-in-out;
 }
+/* Add this class to your style.css file */
+.end-point {
+    fill: #ff4500; /* A nice orange-red color */
+    stroke: #ff9a75;
+    stroke-width: 2px;
+}

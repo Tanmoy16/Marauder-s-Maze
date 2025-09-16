@@ -18,6 +18,7 @@ let gridData = buildFreshGrid();
 let turtle = { x: 0, y: 0, direction: 'north' };
 let turtleEl;
 let cellSize;
+let endPoint = null;
 
 function drawGrid() {
     let gridMarkup = '';
@@ -87,10 +88,23 @@ function refreshState() {
     markPointAsTaken(mainPathPoints.at(-1));
     otherPaths = [];
     failedCount = 0;
+    endPoint = { x: randomInt(0, gridWidth - 1), y: 0 };
+}
+
+function drawEndPoint() {
+    if (!endPoint) return '';
+    
+    const markerSize = cellSize * 0.7;
+    const offset = (cellSize - markerSize) / 2;
+    const x = endPoint.x * cellSize + offset;
+    const y = endPoint.y * cellSize + offset;
+    
+    return `<rect class="end-point" x="${x}" y="${y}" width="${markerSize}" height="${markerSize}" />`;
 }
 
 function drawLines() {
     let markup = otherPaths.map(drawLine).join('') + drawLine(mainPathPoints, 'main');
+    markup += drawEndPoint();
     patternEl.innerHTML = markup;
 }
 
@@ -109,8 +123,7 @@ function buildMainPath() {
         } else {
             mainPathPoints.push(nextPoint);
             markPointAsTaken(nextPoint);
-            if (nextPoint.y === 0) {
-                mainPathPoints.push({ x: nextPoint.x, y: -1 });
+            if (nextPoint.x === endPoint.x && nextPoint.y === endPoint.y) {
                 clearInterval(interval);
                 buildOtherPaths();
             }
@@ -164,7 +177,7 @@ function draw() {
     svgEl.setAttribute('height', mazeHeight);
     patternEl.innerHTML = '';
     if (turtleEl) {
-      turtleEl.style.display = 'none'; // Hide turtle while regenerating
+      turtleEl.style.display = 'none';
     }
     clearInterval(interval);
     buildMainPath();
@@ -176,7 +189,7 @@ function initializeTurtle() {
         turtleEl.classList.add('turtle');
         mazeWrapper.appendChild(turtleEl);
     }
-    turtleEl.style.display = 'block'; // Show turtle
+    turtleEl.style.display = 'block';
     const startPoint = mainPathPoints[1];
     turtle.x = startPoint.x;
     turtle.y = startPoint.y;
@@ -207,7 +220,6 @@ function positionTurtle() {
     turtleEl.style.transform = `rotate(${rotation}deg)`;
 }
 
-// <<< NEW FUNCTION ADDED HERE >>>
 function isPathConnected(p1, p2) {
     const allPaths = [mainPathPoints, ...otherPaths];
 
@@ -216,18 +228,15 @@ function isPathConnected(p1, p2) {
             const currentPoint = path[i];
             const nextPoint = path[i + 1];
 
-            // Check for the connection in both directions (e.g., p1 -> p2 or p2 -> p1)
             if ((currentPoint.x === p1.x && currentPoint.y === p1.y && nextPoint.x === p2.x && nextPoint.y === p2.y) ||
                 (currentPoint.x === p2.x && currentPoint.y === p2.y && nextPoint.x === p1.x && nextPoint.y === p1.y)) {
-                return true; // Found a connection
+                return true;
             }
         }
     }
-    return false; // No direct connection found
+    return false;
 }
 
-
-// <<< MODIFIED FUNCTION HERE >>>
 function moveTurtle(direction) {
     let newX = turtle.x;
     let newY = turtle.y;
@@ -239,21 +248,18 @@ function moveTurtle(direction) {
         case 'west':  newX--; break;
     }
     
-    // Check if the destination is a valid cell AND if there's a path connecting the current and next cell.
     if (isPathConnected({x: turtle.x, y: turtle.y}, {x: newX, y: newY})) {
         turtle.x = newX;
         turtle.y = newY;
         turtle.direction = direction;
         positionTurtle();
-    }
-    
-    // Check for winning condition
-    if (newY < 0 && turtle.y === 0) {
-        // A small delay to allow the turtle to visually move off-screen before the alert
-        setTimeout(() => {
-            alert("🎉 Congratulations! You've solved the maze!");
-            draw(); // Restart the game
-        }, 200);
+
+        if (turtle.x === endPoint.x && turtle.y === endPoint.y) {
+            setTimeout(() => {
+                alert("🎉 Congratulations! You've reached the exit!");
+                draw();
+            }, 200);
+        }
     }
 }
 
