@@ -1,11 +1,19 @@
 import { randomInt, randomItemInArray, randomChance } from 'https://unpkg.com/randomness-helpers@0.0.1/dist/index.js';
 
-const svgEl = document.querySelector('svg');
-const patternEl = document.querySelector('.pattern');
-const gridEl = document.querySelector('.grid');
-const mazeWrapper = document.getElementById('maze-wrapper');
+// --- DOM ELEMENTS ---
+const mapContainer = document.getElementById('map-container');
+const videoContainer = document.getElementById('video-container');
+const videoElement = document.getElementById('gate-video');
+const mazeContainer = document.getElementById('maze-container');
+const welcomeContainer = document.getElementById('welcome-container');
+const allGates = document.querySelectorAll('.gate');
 
-const gridWidth =20;
+// --- MAZE GAME VARIABLES ---
+const svgEl = document.querySelector('#maze-container svg');
+const patternEl = document.querySelector('#maze-container .pattern');
+const gridEl = document.querySelector('#maze-container .grid');
+const mazeWrapper = document.getElementById('maze-wrapper');
+const gridWidth = 20;
 const gridHeight = 20;
 const splittingChance = 0.1;
 const animationSpeed = 20;
@@ -14,11 +22,71 @@ let interval;
 let failedCount = 0;
 let mainPathPoints = [];
 let otherPaths = [];
-let gridData = buildFreshGrid();
+let gridData;
 let turtle = { x: 0, y: 0, direction: 'north' };
 let turtleEl;
 let cellSize;
 let endPoint = null;
+
+// --- GAME STATE MANAGEMENT ---
+let currentLevel = 1;
+const totalLevels = 5;
+
+// Initializes the game or sets up the next level
+function initLevel() {
+    // Hide all screens first
+    mapContainer.classList.add('hidden');
+    videoContainer.classList.add('hidden');
+    mazeContainer.classList.add('hidden');
+    welcomeContainer.classList.add('hidden');
+
+    if (currentLevel > totalLevels) {
+        // Game is over, show welcome message
+        welcomeContainer.classList.remove('hidden');
+    } else {
+        // Show the map and highlight the active gate
+        mapContainer.classList.remove('hidden');
+        updateActiveGate();
+    }
+}
+
+// Updates which gate has the pulsing "active" effect
+function updateActiveGate() {
+    allGates.forEach(gate => {
+        gate.classList.remove('active');
+        if (parseInt(gate.dataset.level) === currentLevel) {
+            gate.classList.add('active');
+        }
+    });
+}
+
+// Starts the video-to-maze transition
+function startMazeChallenge() {
+    mapContainer.classList.add('hidden');
+    videoContainer.classList.remove('hidden');
+    videoElement.currentTime = 0; // Rewind video
+    videoElement.play();
+}
+
+// --- EVENT LISTENERS ---
+
+// Listen for the up arrow key only when the map is visible
+document.addEventListener('keydown', (e) => {
+    if (!mapContainer.classList.contains('hidden') && e.key === 'ArrowUp') {
+        e.preventDefault();
+        startMazeChallenge();
+    }
+});
+
+// Listen for when the transition video ends
+videoElement.addEventListener('ended', () => {
+    videoContainer.classList.add('hidden');
+    mazeContainer.classList.remove('hidden');
+    // Start generating a new maze for the current level
+    draw();
+});
+
+// --- ALL MAZE FUNCTIONS ---
 
 function drawGrid() {
     let gridMarkup = '';
@@ -43,27 +111,22 @@ function adjustMazePoint(point) {
 }
 
 function buildPathData(points) {
-    points = points.map(adjustMazePoint);
-    const firstPoint = points.shift();
+    let transformedPoints = points.map(adjustMazePoint);
+    const firstPoint = transformedPoints.shift();
+    if (!firstPoint) return '';
     let commands = [`M ${firstPoint.x}, ${firstPoint.y}`];
-    points.forEach(point => commands.push(`L ${point.x}, ${point.y}`));
+    transformedPoints.forEach(point => commands.push(`L ${point.x}, ${point.y}`));
     return commands.join(' ');
 }
 
 function drawLine(points, className = '') {
-    return `<path class="maze-path ${className}" d="${buildPathData(points)}"/>`;
+    return `<path class="maze-path ${className}" d="${buildPathData([...points])}"/>`;
 }
 
 function mainPathStartPoints() {
     return [
-        {
-            x: 0, 
-            y: gridHeight
-        },
-        {
-            x: 0, 
-            y: gridHeight - 1
-        }
+        { x: 0, y: gridHeight },
+        { x: 0, y: gridHeight - 1 }
     ];
 }
 
@@ -93,17 +156,15 @@ function refreshState() {
 
 function drawEndPoint() {
     if (!endPoint) return '';
-    
     const markerSize = cellSize * 0.7;
     const offset = (cellSize - markerSize) / 2;
     const x = endPoint.x * cellSize + offset;
     const y = endPoint.y * cellSize + offset;
-    
     return `<rect class="end-point" x="${x}" y="${y}" width="${markerSize}" height="${markerSize}" />`;
 }
 
 function drawLines() {
-    let markup = otherPaths.map(drawLine).join('') + drawLine(mainPathPoints, 'main');
+    let markup = otherPaths.map(path => drawLine(path)).join('') + drawLine(mainPathPoints, 'main');
     markup += drawEndPoint();
     patternEl.innerHTML = markup;
 }
@@ -197,19 +258,25 @@ function initializeTurtle() {
     positionTurtle();
 }
 
+// In script.js, replace the old function with this one
+
 function positionTurtle() {
     const svgRect = svgEl.getBoundingClientRect();
     const mazeWrapperRect = mazeWrapper.getBoundingClientRect();
 
+    // Calculate the SVG's top-left corner relative to the maze-wrapper
     const offsetX = svgRect.left - mazeWrapperRect.left;
     const offsetY = svgRect.top - mazeWrapperRect.top;
 
-    const top = offsetY + (turtle.y * cellSize) + (cellSize / 2) - 12.5;
-    const left = offsetX + (turtle.x * cellSize) + (cellSize / 2) - 12.5;
+    // Calculate the center of the turtle's target cell
+    const targetX = offsetX + (turtle.x * cellSize) + (cellSize / 2);
+    const targetY = offsetY + (turtle.y * cellSize) + (cellSize / 2);
 
-    turtleEl.style.left = `${left}px`;
-    turtleEl.style.top = `${top}px`;
+    // Position the turtle's top-left corner at the cell's center
+    turtleEl.style.left = `${targetX}px`;
+    turtleEl.style.top = `${targetY}px`;
 
+    // Determine rotation
     let rotation = 0;
     switch (turtle.direction) {
         case 'north': rotation = 0; break;
@@ -217,17 +284,17 @@ function positionTurtle() {
         case 'south': rotation = 180; break;
         case 'west': rotation = 270; break;
     }
-    turtleEl.style.transform = `rotate(${rotation}deg)`;
+    
+    // Use CSS transform to perfectly center the turtle on the point and rotate it
+    turtleEl.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
 }
 
 function isPathConnected(p1, p2) {
     const allPaths = [mainPathPoints, ...otherPaths];
-
     for (const path of allPaths) {
         for (let i = 0; i < path.length - 1; i++) {
             const currentPoint = path[i];
             const nextPoint = path[i + 1];
-
             if ((currentPoint.x === p1.x && currentPoint.y === p1.y && nextPoint.x === p2.x && nextPoint.y === p2.y) ||
                 (currentPoint.x === p2.x && currentPoint.y === p2.y && nextPoint.x === p1.x && nextPoint.y === p1.y)) {
                 return true;
@@ -237,6 +304,7 @@ function isPathConnected(p1, p2) {
     return false;
 }
 
+// MODIFIED moveTurtle function for level progression
 function moveTurtle(direction) {
     let newX = turtle.x;
     let newY = turtle.y;
@@ -256,33 +324,37 @@ function moveTurtle(direction) {
 
         if (turtle.x === endPoint.x && turtle.y === endPoint.y) {
             setTimeout(() => {
-                alert("🎉 Congratulations! You've reached the exit!");
-                draw();
+                alert(`Level ${currentLevel} complete!`);
+                currentLevel++; // Advance to the next level
+                initLevel();    // Go back to the map (or finish the game)
             }, 200);
         }
     }
 }
 
+// Final event listener for maze-specific keys
 document.body.addEventListener('keydown', (e) => {
-    e.preventDefault(); 
-    
-    switch (e.key) {
-        case 'ArrowUp':
-            moveTurtle('north');
-            break;
-        case 'ArrowDown':
-            moveTurtle('south');
-            break;
-        case 'ArrowLeft':
-            moveTurtle('west');
-            break;
-        case 'ArrowRight':
-            moveTurtle('east');
-            break;
-        case 'r':
-            draw();
-            break;
+    // Only respond to these keys if the maze is visible
+    if (!mazeContainer.classList.contains('hidden')) {
+        switch (e.key) {
+            case 'ArrowUp':
+                moveTurtle('north');
+                break;
+            case 'ArrowDown':
+                moveTurtle('south');
+                break;
+            case 'ArrowLeft':
+                moveTurtle('west');
+                break;
+            case 'ArrowRight':
+                moveTurtle('east');
+                break;
+            case 'r':
+                draw(); // Redraw current maze
+                break;
+        }
     }
 });
 
-draw();
+// --- INITIALIZE THE GAME ---
+initLevel(); // Start the game!

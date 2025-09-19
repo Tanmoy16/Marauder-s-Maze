@@ -3,47 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Potter Nova: The Maze Challenge</title>
+    <title>Potter Nova: The Journey to Hogwarts</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>Potter Nova: The Maze Challenge</h1>
-    </header>
 
-    <main id="game-container">
+    <div id="map-container">
+        <div class="gate" data-level="1" style="top: 65%; left: 23%;"></div>
+        <div class="gate" data-level="2" style="top: 48%; left: 16%;"></div>
+        <div class="gate" data-level="3" style="top: 80%; left: 55%;"></div>
+        <div class="gate" data-level="4" style="top: 50%; left: 75%;"></div>
+        <div class="gate" data-level="5" style="top: 25%; left: 80%;"></div>
+    </div>
+
+    <div id="video-container" class="hidden">
+        <video id="gate-video" width="100%" height="100%">
+            <source src="gate-animation.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <main id="maze-container" class="hidden">
+        <header>
+            <h1>Potter Nova: The Maze Challenge</h1>
+        </header>
         <div id="maze-wrapper">
-            <svg 
-              viewBox="0 0 1000 1000" 
-              width="1000" 
-              height="1000" 
-              role="img">
-              <title>A square maze.</title>
-              
-              <style> 
-                g {  
-                  --cell-size: 50px;
-                  --stroke-width: 10px;
-                }
-                .grid-line {
-                  fill: none;
-                  stroke: var(--maze-stroke-color);
-                  stroke-width: var(--stroke-width);
-                  stroke-linecap: square;
-                }
-                .maze-path {
-                  fill: none;
-                  stroke: white;
-                  stroke-width: calc(var(--cell-size) - var(--stroke-width));
-                  stroke-linecap: square;
-                }
-              </style>
-            
-              <g class="grid"></g>
-              <g class="pattern"></g>
+            <svg viewBox="0 0 1000 1000" width="1000" height="1000" role="img">
+                <title>A square maze.</title>
+                <style>
+                    g {
+                        --cell-size: 50px;
+                        --stroke-width: 10px;
+                    }
+                    .grid-line {
+                        fill: none;
+                        stroke: var(--maze-stroke-color);
+                        stroke-width: var(--stroke-width);
+                        stroke-linecap: square;
+                    }
+                    .maze-path {
+                        fill: none;
+                        stroke: white;
+                        stroke-width: calc(var(--cell-size) - var(--stroke-width));
+                        stroke-linecap: square;
+                    }
+                </style>
+                <g class="grid"></g>
+                <g class="pattern"></g>
             </svg>
         </div>
     </main>
+
+    <div id="welcome-container" class="hidden">
+        <h1>Welcome to Hogwarts!</h1>
+    </div>
 
     <script src="script.js" type="module"></script>
 </body>
