@@ -264,23 +264,32 @@ function initializeTurtle() {
     positionTurtle();
 }
 
+// In script.js, replace the old positionTurtle function with this one
+
 function positionTurtle() {
     const svgRect = svgEl.getBoundingClientRect();
     const mazeWrapperRect = mazeWrapper.getBoundingClientRect();
+
+    // Calculate the SVG's top-left corner relative to the maze-wrapper
     const offsetX = svgRect.left - mazeWrapperRect.left;
     const offsetY = svgRect.top - mazeWrapperRect.top;
+
+    // Calculate the center of the turtle's target cell
     const targetX = offsetX + (turtle.x * cellSize) + (cellSize / 2);
     const targetY = offsetY + (turtle.y * cellSize) + (cellSize / 2);
-    turtleEl.style.left = `${targetX}px`;
-    turtleEl.style.top = `${targetY}px`;
+
+    // Determine rotation
     let rotation = 0;
     switch (turtle.direction) {
         case 'north': rotation = 0; break;
-        case 'east': rotation = 90; break;
+        case 'east':  rotation = 90; break;
         case 'south': rotation = 180; break;
-        case 'west': rotation = 270; break;
+        case 'west':  rotation = 270; break;
     }
-    turtleEl.style.transform = `translate(-50%, -50%) rotate(${rotation}deg)`;
+    
+    // Set the turtle's position and rotation in a single, high-performance transform operation.
+    // This moves the turtle to the target X/Y coordinates, then centers and rotates it.
+    turtleEl.style.transform = `translateX(${targetX}px) translateY(${targetY}px) translate(-50%, -50%) rotate(${rotation}deg)`;
 }
 
 function isPathConnected(p1, p2) {
