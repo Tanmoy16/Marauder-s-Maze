@@ -11,7 +11,7 @@ body {
     display: none !important;
 }
 
-/* --- Screen 1: Map Styling --- */
+/* Screen 1: Map Styling */
 #map-container {
     position: absolute;
     top: 0;
@@ -22,141 +22,42 @@ body {
     background-size: cover;
     background-position: center;
 }
+.gate { position: absolute; width: 60px; height: 60px; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90" fill="%23FFD700">❓</text></svg>'); background-size: contain; cursor: pointer; transform: translate(-50%, -50%); opacity: 0.7; transition: all 0.3s ease; }
+.gate.completed { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90" fill="%2332CD32">✅</text></svg>'); opacity: 1; animation: none; }
+.gate.active { opacity: 1; animation: pulse 2s infinite; }
+@keyframes pulse { 0% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 5px #fff); } 50% { transform: translate(-50%, -50%) scale(1.1); filter: drop-shadow(0 0 15px #fff); } 100% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 5px #fff); } }
 
-.gate {
-    position: absolute;
-    width: 60px;
-    height: 60px;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90" fill="%23FFD700">❓</text></svg>');
-    background-size: contain;
-    cursor: pointer;
-    transform: translate(-50%, -50%);
-    opacity: 0.7;
-    transition: all 0.3s ease;
-}
+/* Screen 2: Video Player Styling */
+#video-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #000; z-index: 100; }
+#gate-video { width: 100%; height: 100%; object-fit: cover; }
 
-/* Style for the check mark on a completed gate */
-.gate.completed {
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90" fill="%2332CD32">✅</text></svg>');
-    opacity: 1;
-    animation: none; /* Turn off pulsing for completed gates */
-}
-
-.gate.active {
-    opacity: 1;
-    animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-    0% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 5px #fff); }
-    50% { transform: translate(-50%, -50%) scale(1.1); filter: drop-shadow(0 0 15px #fff); }
-    100% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 5px #fff); }
-}
-
-/* --- Screen 2: Video Player Styling --- */
-#video-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: #000;
-    z-index: 100;
-}
-
-#gate-video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* --- Screen 3: Maze Game Styling --- */
-#maze-container {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    width: 100vw;
-}
-
-#maze-container header {
-    text-align: center;
-    padding: 10px;
-    background-color: #000;
-    border-bottom: 2px solid #00ff00;
-    flex-shrink: 0;
-}
-
+/* Screen 3: Maze Game Styling */
+#maze-container { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
+#maze-container header { text-align: center; padding: 10px; background-color: #000; border-bottom: 2px solid #00ff00; flex-shrink: 0; }
 #maze-wrapper {
     flex-grow: 1;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 10px;
-    background: #000;
     position: relative;
     overflow: hidden;
+    /* NEW: Styles for the background image */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
-svg {
-    max-width: 100%;
-    max-height: 100%;
-}
-
-.end-point {
-    fill: #ff4500;
-    stroke: #ff9a75;
-    stroke-width: 2px;
-}
-
-/* In style.css, replace your .turtle rule with this */
-
-.turtle {
-    position: absolute;
-    /* Set a starting point; all movement will be handled by transform */
-    top: 0;
-    left: 0;
-    width: 0;
-    height: 0;
-    border-left: 10px solid transparent;
-    border-right: 10px solid transparent;
-    border-bottom: 20px solid cyan;
-    z-index: 10;
-    /* This is the key change: we only transition the transform property */
-    transition: transform 0.2s ease-in-out;
-}
-
-/* --- Screen 4: Welcome Screen Styling --- */
-#welcome-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: #000;
-    z-index: 100;
-}
-
-#welcome-video {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-/* Add these styles to your style.css file */
-
-#maze-wrapper svg {
-    /* --cell-size: 50px; <--- DELETE THIS LINE */
-    /* --stroke-width: 10px; <--- DELETE THIS LINE */
-}
-
-.grid-line {
-    fill: none;
-    stroke: #333; /* A dark color for the grid lines */
-    stroke-width: 1px;
-}
-
+svg { max-width: 100%; max-height: 100%; }
+.grid-line { fill: none; stroke: #333; stroke-width: 1px; }
 .maze-path {
     fill: none;
-    stroke: white;
-    /* stroke-width: calc(var(--cell-size) - var(--stroke-width)); <--- DELETE THIS LINE */
+    /* MODIFIED: Removed 'stroke: white' */
     stroke-linecap: square;
 }
+.end-point { fill: #ff4500; stroke: #ff9a75; stroke-width: 2px; }
+.turtle { position: absolute; top: 0; left: 0; width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 20px solid cyan; z-index: 10; transition: transform 0.2s ease-in-out; }
+
+/* Screen 4: Welcome Screen Styling */
+#welcome-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #000; z-index: 100; }
+#welcome-video { width: 100%; height: 100%; object-fit: cover; }
