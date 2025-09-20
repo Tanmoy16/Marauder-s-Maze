@@ -4,10 +4,9 @@ body {
     color: #00ff00;
     margin: 0;
     height: 100vh;
-    overflow: hidden; /* Prevent scrolling */
+    overflow: hidden;
 }
 
-/* Helper class to hide elements */
 .hidden {
     display: none !important;
 }
@@ -19,7 +18,6 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    /* IMPORTANT: Make sure this image file is in the correct folder */
     background-image: url('map.jpg');
     background-size: cover;
     background-position: center;
@@ -37,24 +35,22 @@ body {
     transition: all 0.3s ease;
 }
 
+/* Style for the check mark on a completed gate */
+.gate.completed {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90" fill="%2332CD32">✅</text></svg>');
+    opacity: 1;
+    animation: none; /* Turn off pulsing for completed gates */
+}
+
 .gate.active {
     opacity: 1;
     animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-    0% {
-        transform: translate(-50%, -50%) scale(1);
-        filter: drop-shadow(0 0 5px #fff);
-    }
-    50% {
-        transform: translate(-50%, -50%) scale(1.1);
-        filter: drop-shadow(0 0 15px #fff);
-    }
-    100% {
-        transform: translate(-50%, -50%) scale(1);
-        filter: drop-shadow(0 0 5px #fff);
-    }
+    0% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 5px #fff); }
+    50% { transform: translate(-50%, -50%) scale(1.1); filter: drop-shadow(0 0 15px #fff); }
+    100% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 5px #fff); }
 }
 
 /* --- Screen 2: Video Player Styling --- */
@@ -87,18 +83,18 @@ body {
     padding: 10px;
     background-color: #000;
     border-bottom: 2px solid #00ff00;
-    flex-shrink: 0; /* Prevents header from shrinking */
+    flex-shrink: 0;
 }
 
 #maze-wrapper {
-    flex-grow: 1; /* Fills the space below the header */
+    flex-grow: 1;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 10px;
     background: #000;
     position: relative;
-    overflow: hidden; /* Prevents the maze from overflowing */
+    overflow: hidden;
 }
 
 svg {
@@ -107,7 +103,7 @@ svg {
 }
 
 .end-point {
-    fill: #ff4500; /* Orange-red color for the exit marker */
+    fill: #ff4500;
     stroke: #ff9a75;
     stroke-width: 2px;
 }
@@ -126,11 +122,36 @@ svg {
 
 /* --- Screen 4: Welcome Screen Styling --- */
 #welcome-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
     height: 100vh;
-    font-size: 3em;
-    color: #FFD700;
-    text-shadow: 2px 2px 5px #000;
+    background-color: #000;
+    z-index: 100;
+}
+
+#welcome-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+/* Add these styles to your style.css file */
+
+#maze-wrapper svg {
+    /* --cell-size: 50px; <--- DELETE THIS LINE */
+    /* --stroke-width: 10px; <--- DELETE THIS LINE */
+}
+
+.grid-line {
+    fill: none;
+    stroke: #333; /* A dark color for the grid lines */
+    stroke-width: 1px;
+}
+
+.maze-path {
+    fill: none;
+    stroke: white;
+    /* stroke-width: calc(var(--cell-size) - var(--stroke-width)); <--- DELETE THIS LINE */
+    stroke-linecap: square;
 }
