@@ -1,5 +1,17 @@
 import { randomInt, randomItemInArray, randomChance } from 'https://unpkg.com/randomness-helpers@0.0.1/dist/index.js';
 
+// --- NEW WEBSOCKET ---
+// Connect to your server (make sure server.js is running)
+// Use "http://localhost:3000" for testing
+// Use your server's public IP when you deploy
+const socket = io("http://localhost:3000"); 
+
+// Get the player's name (you can make this a proper UI later)
+const playerName = prompt("Enter your wizard name:") || "Nameless Wizard";
+socket.emit("joinGame", { name: playerName });
+// --- END NEW WEBSOCKET ---
+
+
 // --- DOM ELEMENTS ---
 const mapContainer = document.getElementById('map-container');
 const videoContainer = document.getElementById('video-container');
@@ -15,7 +27,6 @@ const svgEl = document.querySelector('#maze-container svg');
 const patternEl = document.querySelector('#maze-container .pattern');
 const gridEl = document.querySelector('#maze-container .grid');
 const mazeWrapper = document.getElementById('maze-wrapper');
-// Adjust splittingChance for maze difficulty (lower is harder)
 const gridWidth = 20, gridHeight = 20, splittingChance = 0.00005, retryLimit = 30;
 let mainPathPoints = [], otherPaths = [], gridData = [];
 let turtle = { x: 0, y: 0, direction: 'north' };
@@ -25,8 +36,9 @@ let turtleEl, cellSize, endPoint = null;
 let currentLevel = 1;
 const totalLevels = 5;
 let completedLevels = [];
+let mazeStartTime; // NEW: To time the maze completion
 
-// NEW: Array to hold theme data for each level
+// Array to hold theme data for each level
 const levelThemes = [
     { name: "Hogsmeade Railway Station", pathColor: '#CDBA96', backgroundImage: 'hogsmeade-bg.jpg' },
     { name: "The Whomping Willows",      pathColor: '#8B4513', backgroundImage: 'willow-bg.jpg' },
@@ -90,6 +102,18 @@ gateVideoElement.addEventListener('ended', () => {
     mazeContainer.classList.remove('hidden');
     renderMazeFromData(); 
     initializeTurtle();
+
+    // --- NEW WEBSOCKET ---
+    // Start the timer for this maze
+    mazeStartTime = Date.now(); 
+    
+    // Tell the server which maze this player is now in
+    const theme = levelThemes[currentLevel - 1];
+    socket.emit("playerUpdate", {
+        mazeName: theme.name, // e.g., "The Whomping Willows"
+        mazeLevel: currentLevel
+    });
+    // --- END NEW WEBSOCKET ---
 });
 
 // --- MAZE GENERATION & RENDERING ---
@@ -150,7 +174,7 @@ function renderMazeFromData() {
     
     gridEl.innerHTML = ''; // Ensure grid is empty
     let markup = otherPaths.map(path => drawLine(path, '', theme.pathColor)).join('') 
-               + drawLine(mainPathPoints, 'main', theme.pathColor);
+                 + drawLine(mainPathPoints, 'main', theme.pathColor);
     markup += drawEndPoint();
     patternEl.innerHTML = markup;
 }
@@ -172,8 +196,55 @@ function drawEndPoint() { if (!endPoint) return ''; const s = cellSize * 0.7, o 
 function initializeTurtle() { if (!turtleEl) { turtleEl = document.createElement('div'); turtleEl.classList.add('turtle'); mazeWrapper.appendChild(turtleEl); } turtleEl.style.display = 'block'; const s = mainPathPoints[1]; turtle.x = s.x; turtle.y = s.y; turtle.direction = 'north'; positionTurtle(); }
 function positionTurtle() { const s = svgEl.getBoundingClientRect(), m = mazeWrapper.getBoundingClientRect(), oX = s.left - m.left, oY = s.top - m.top, tX = oX + (turtle.x * cellSize) + (cellSize / 2), tY = oY + (turtle.y * cellSize) + (cellSize / 2); let r = 0; switch (turtle.direction) { case 'east': r = 90; break; case 'south': r = 180; break; case 'west': r = 270; break; } turtleEl.style.transform = `translateX(${tX}px) translateY(${tY}px) translate(-50%, -50%) rotate(${r}deg)`; }
 function isPathConnected(p1, p2) { const a = [mainPathPoints, ...otherPaths]; for (const p of a) { for (let i = 0; i < p.length - 1; i++) { const c = p[i], n = p[i + 1]; if ((c.x === p1.x && c.y === p1.y && n.x === p2.x && n.y === p2.y) || (c.x === p2.x && c.y === p2.y && n.x === p1.x && n.y === p1.y)) return true; } } return false; }
-function moveTurtle(direction) { let nX = turtle.x, nY = turtle.y; switch (direction) { case 'north': nY--; break; case 'east': nX++; break; case 'south': nY++; break; case 'west': nX--; break; } if (isPathConnected({ x: turtle.x, y: turtle.y }, { x: nX, y: nY })) { turtle.x = nX; turtle.y = nY; turtle.direction = direction; positionTurtle(); if (turtle.x === endPoint.x && turtle.y === endPoint.y) { setTimeout(() => { alert(`Level ${currentLevel} complete!`); completedLevels.push(currentLevel); currentLevel++; initLevel(); }, 200); } } }
-document.body.addEventListener('keydown', (e) => { if (!mazeContainer.classList.contains('hidden')) { switch (e.key) { case 'ArrowUp': moveTurtle('north'); break; case 'ArrowDown': moveTurtle('south'); break; case 'ArrowLeft': moveTurtle('west'); break; case 'ArrowRight': moveTurtle('east'); break; } } });
+
+function moveTurtle(direction) {
+    let nX = turtle.x, nY = turtle.y;
+    switch (direction) {
+        case 'north': nY--; break;
+        case 'east': nX++; break;
+        case 'south': nY++; break;
+        case 'west': nX--; break;
+    }
+    if (isPathConnected({ x: turtle.x, y: turtle.y }, { x: nX, y: nY })) {
+        turtle.x = nX;
+        turtle.y = nY;
+        turtle.direction = direction;
+        positionTurtle();
+        if (turtle.x === endPoint.x && turtle.y === endPoint.y) {
+            setTimeout(() => {
+                alert(`Level ${currentLevel} complete!`);
+
+                // --- NEW WEBSOCKET ---
+                // Calculate time and score
+                const timeTakenInSeconds = (Date.now() - mazeStartTime) / 1000;
+                // Simple score: 10,000 minus time. Faster is better.
+                const score = Math.max(10, 10000 - Math.floor(timeTakenInSeconds)); 
+
+                // Tell the server this player finished the level
+                socket.emit("mazeComplete", {
+                    level: currentLevel,
+                    score: score
+                });
+                // --- END NEW WEBSOCKET ---
+
+                completedLevels.push(currentLevel);
+                currentLevel++;
+                initLevel();
+            }, 200);
+        }
+    }
+}
+
+document.body.addEventListener('keydown', (e) => {
+    if (!mazeContainer.classList.contains('hidden')) {
+        switch (e.key) {
+            case 'ArrowUp': moveTurtle('north'); break;
+            case 'ArrowDown': moveTurtle('south'); break;
+            case 'ArrowLeft': moveTurtle('west'); break;
+            case 'ArrowRight': moveTurtle('east'); break;
+        }
+    }
+});
 
 // --- INITIALIZE THE GAME ---
 initLevel();

@@ -1,0 +1,55 @@
+body {
+    font-family: 'Courier New', Courier, monospace;
+    background-color: #121212;
+    color: #fff;
+    margin: 0;
+    overflow: hidden;
+}
+
+#main-map-container {
+    width: 100vw;
+    height: 100vh;
+    /* Use your map image here! Make sure it's named main-map.jpg */
+    background-image: url('map.jpg'); 
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+}
+
+#leaderboard {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid #D4AF37;
+    padding: 10px 20px;
+    width: 300px;
+    border-radius: 8px;
+}
+#leaderboard ol { padding-left: 25px; }
+#leaderboard li { margin-bottom: 5px; font-size: 1.2em; }
+
+/* This is the player icon on the map */
+.player-icon {
+    position: absolute;
+    width: 80px;
+    padding: 5px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 1px solid cyan;
+    border-radius: 5px;
+    text-align: center;
+    font-size: 0.9em;
+    transition: top 0.5s ease, left 0.5s ease;
+    white-space: nowrap;
+    /* So icons don't block each other */
+    transform: translate(-50%, -50%); 
+}
+.player-name {
+    font-weight: bold;
+    color: cyan;
+}
+.player-location {
+    font-size: 0.8em;
+    color: #eee;
+}
