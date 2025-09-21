@@ -22,18 +22,98 @@ body {
     background-size: cover;
     background-position: center;
 }
-.gate { position: absolute; width: 60px; height: 60px; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90" fill="%23FFD700">❓</text></svg>'); background-size: contain; cursor: pointer; transform: translate(-50%, -50%); opacity: 0.7; transition: all 0.3s ease; }
-.gate.completed { background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90" fill="%2332CD32">✅</text></svg>'); opacity: 1; animation: none; }
-.gate.active { opacity: 1; animation: pulse 2s infinite; }
-@keyframes pulse { 0% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 5px #fff); } 50% { transform: translate(-50%, -50%) scale(1.1); filter: drop-shadow(0 0 15px #fff); } 100% { transform: translate(-50%, -50%) scale(1); filter: drop-shadow(0 0 5px #fff); } }
+/* REMOVE all old .gate, .gate.completed, .gate.active, and @keyframes pulse rules */
 
+/* NEW Gate Styling */
+.gate {
+    position: absolute;
+    width: 60px;
+    height: 60px;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+}
+
+/* NEW Footprint Styling */
+.footprint {
+    position: absolute;
+    width: 40%;
+    height: 40%;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23333" d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM153.5 224c22.1 0 40-17.9 40-40s-17.9-40-40-40s-40 17.9-40 40s17.9 40 40 40zm9.6 32c-35.3 0-64 28.7-64 64H320c0-35.3-28.7-64-64-64h-92.8zm243.4-3.5c-11.1-16.6-28.8-28.5-49.5-28.5c-35.3 0-64 28.7-64 64v32c0 17.7-14.3 32-32 32h-16c-17.7 0-32-14.3-32-32V320c0-70.7 57.3-128 128-128c50.5 0 94.1 29.3 115.2 71.5c4.4 8.7 6.8 18.2 6.8 28.5c0 35.3-28.7 64-64 64h-8.8c12.5 13.4 20.8 30.6 20.8 50.5c0 8.8-7.2 16-16 16s-16-7.2-16-16c0-19.8-12.2-36.8-29.5-45.3c-2.4-1.2-5.1-1.8-7.8-1.8H224c-17.7 0-32 14.3-32 32v32c0 17.7 14.3 32 32 32h16c17.7 0 32-14.3 32-32v-32c0-35.3 28.7-64 64-64h8.8c12.5-13.4 20.8-30.6 20.8-50.5c0-8.8 7.2-16 16-16s16 7.2 16 16c0 19.8 12.2 36.8 29.5 45.3c2.4 1.2 5.1 1.8 7.8 1.8h32c17.7 0 32-14.3 32-32v-32c0-17.7-14.3-32-32-32z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0.8;
+}
+
+/* Static footprints for completed gates */
+.footprint.static-1 { top: 30%; left: 30%; transform: rotate(-25deg); }
+.footprint.static-2 { top: 50%; left: 50%; transform: rotate(-10deg); }
+
+
+/* Appearing footprints for active gates */
+.footprint.active {
+    opacity: 0;
+    animation: appear 0.5s ease-out forwards;
+}
+@keyframes appear {
+    to { opacity: 0.9; transform: scale(1.1) rotate(-10deg); }
+}
+
+/* NEW Path Animation Styling */
+#path-svg {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; /* Allows clicks to pass through to gates */
+}
+
+#path-animator {
+    position: absolute;
+    top: 0; left: 0;
+    width: 25px; /* Adjust size as needed */
+    height: 25px;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path fill="%23000" d="M256 512c141.4 0 256-114.6 256-256S397.4 0 256 0S0 114.6 0 256S114.6 512 256 512zM153.5 224c22.1 0 40-17.9 40-40s-17.9-40-40-40s-40 17.9-40 40s17.9 40 40 40zm9.6 32c-35.3 0-64 28.7-64 64H320c0-35.3-28.7-64-64-64h-92.8zm243.4-3.5c-11.1-16.6-28.8-28.5-49.5-28.5c-35.3 0-64 28.7-64 64v32c0 17.7-14.3 32-32 32h-16c-17.7 0-32-14.3-32-32V320c0-70.7 57.3-128 128-128c50.5 0 94.1 29.3 115.2 71.5c4.4 8.7 6.8 18.2 6.8 28.5c0 35.3-28.7 64-64 64h-8.8c12.5 13.4 20.8 30.6 20.8 50.5c0 8.8-7.2 16-16 16s-16-7.2-16-16c0-19.8-12.2-36.8-29.5-45.3c-2.4-1.2-5.1-1.8-7.8-1.8H224c-17.7 0-32 14.3-32 32v32c0 17.7 14.3 32 32 32h16c17.7 0 32-14.3 32-32v-32c0-35.3 28.7-64 64-64h8.8c12.5-13.4 20.8-30.6 20.8-50.5c0-8.8 7.2-16 16-16s16 7.2 16 16c0 19.8 12.2 36.8 29.5 45.3c2.4 1.2 5.1 1.8 7.8 1.8h32c17.7 0 32-14.3 32-32v-32c0-17.7-14.3-32-32-32z"/></svg>');
+    background-size: contain;
+    background-repeat: no-repeat;
+    opacity: 0;
+    offset-rotate: 90deg; /* Makes footprint point forward */
+}
+
+#path-animator.animate {
+    opacity: 1;
+    animation: move-along-path 2.5s ease-in-out forwards;
+}
+
+@keyframes move-along-path {
+    from { offset-distance: 0%; }
+    to { offset-distance: 100%; }
+}
 /* Screen 2: Video Player Styling */
 #video-container { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #000; z-index: 100; }
 #gate-video { width: 100%; height: 100%; object-fit: cover; }
 
 /* Screen 3: Maze Game Styling */
-#maze-container { display: flex; flex-direction: column; height: 100vh; width: 100vw; }
-#maze-container header { text-align: center; padding: 10px; background-color: #000; border-bottom: 2px solid #00ff00; flex-shrink: 0; }
+/* Screen 3: Maze Game Styling */
+#maze-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+    /* Add these three lines */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#maze-container header { 
+    text-align: center; 
+    padding: 10px; 
+    background-color: rgba(0, 0, 0, 0.5); /* Added transparency */
+    border-bottom: 2px solid #00ff00; 
+    flex-shrink: 0; 
+    position: relative; /* Ensures header is on top */
+    z-index: 5;
+}
+
 #maze-wrapper {
     flex-grow: 1;
     display: flex;
@@ -42,10 +122,6 @@ body {
     padding: 10px;
     position: relative;
     overflow: hidden;
-    /* NEW: Styles for the background image */
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
 }
 
 svg { max-width: 100%; max-height: 100%; }
