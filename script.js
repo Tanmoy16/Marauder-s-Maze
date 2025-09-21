@@ -49,9 +49,9 @@ let completedLevels = [];
 // NEW: Array to hold theme data for each level
 const levelThemes = [
     { name: "Hogsmeade Railway Station", pathColor: '#CDBA96', backgroundImage: 'hogsmeade-bg.jpg' },
-    { name: "The Whomping Willows",      pathColor: '#8B4513', backgroundImage: 'willow-bg.jpg' },
-    { name: "The Quidditch Ground",      pathColor: '#6B8E23', backgroundImage: 'quidditch-bg.jpg' },
-    { name: "The Forbidden Forest",      pathColor: '#2F4F4F', backgroundImage: 'forest-bg.jpg' },
+    { name: "The Whomping Willows",      pathColor: '#d4e025ff', backgroundImage: 'willow-bg.jpg' },
+    { name: "The Quidditch Ground",      pathColor: '#cd2bbaff', backgroundImage: 'quidditch-bg.jpg' },
+    { name: "The Forbidden Forest",      pathColor: '#109c9cff', backgroundImage: 'forest-bg.jpg' },
     { name: "The Hogwarts Gate",         pathColor: '#D4AF37', backgroundImage: 'gate-bg.jpg' }
 ];
 
