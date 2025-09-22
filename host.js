@@ -1,21 +1,22 @@
-// --- Map locations for each maze name ---
-// !! YOU MUST UPDATE these top/left % values
-// to match the locations on *your* map image !!
-const mazeLocations = {
-    "Hogsmeade Railway Station": { top: "80%", left: "20%" }, // Level 1 guess
-    "The Whomping Willows":      { top: "50%", left: "18%" }, // Level 2 guess
-    "The Quidditch Ground":       { top: "25%", left: "80%" }, // Level 5 guess
-    "The Forbidden Forest":       { top: "50%", left: "75%" }, // Level 4 guess
-    "The Hogwarts Gate":          { top: "80%", left: "55%" }, // Level 3 guess
-    "Hogwarts Map":               { top: "10%", left: "10%" }  // Default
-};
+// --- Map locations for each maze ---
+// This is your "start point" and "move to" points
+const levelPositions = [
+    { top: "65%", left: "23%" }, // 1. Start at Gate 1
+    { top: "48%", left: "16%" }, // 2. Move to Gate 2
+    { top: "80%", left: "55%" }, // 3. Move to Gate 3
+    { top: "50%", left: "75%" }, // 4. Move to Gate 4
+    { top: "25%", left: "80%" }, // 5. Move to Gate 5
+    { top: "30%", left: "50%" }  // 6. Finished! (At Hogwarts castle)
+];
 
 // --- DOM Elements ---
 const mapContainer = document.getElementById('main-map-container');
 const leaderboardList = document.getElementById('leaderboard-list');
 
 // --- Connect to Server as HOST ---
-const socket = io("http://localhost:3000"); // Use your server's address
+// !! IMPORTANT !!
+// Change "YOUR_REAL_IP" to your computer's actual Wi-Fi IP address
+const socket = io("http://192.168.56.1:3000"); // <-- e.g., http://192.168.1.10:3000
 socket.emit("joinHost");
 
 // --- Listen for updates from the Server ---
@@ -26,29 +27,31 @@ socket.on("gameStateUpdate", (gameState) => {
     mapContainer.innerHTML = '';
     leaderboardList.innerHTML = '';
 
-    // --- 1. Render Players on Map ---
+    // --- 1. Render Players on Map (NOW USES LEVEL) ---
     for (const id in gameState.players) {
         const player = gameState.players[id];
-        const location = mazeLocations[player.currentMaze] || mazeLocations["Hogwarts Map"];
+        
+        // Get the player's level (1-6) and find the correct position
+        const location = levelPositions[player.level - 1] || levelPositions[0]; // Default to start
 
         // Create a new element for the player
         const playerEl = document.createElement('div');
         playerEl.className = 'player-icon';
-        playerEl.id = player.id; // Set id for easy tracking
+        playerEl.id = player.id;
         playerEl.style.top = location.top;
         playerEl.style.left = location.left;
 
         playerEl.innerHTML = `
             <div class="player-name">${player.name}</div>
-            <div class="player-location">${player.currentMaze}</div>
+            <div class="player-location">${player.currentMaze || 'Hogwarts Map'}</div>
         `;
         mapContainer.appendChild(playerEl);
     }
 
-    // --- 2. Render Leaderboard ---
+    // --- 2. Render Leaderboard (NOW SHOWS EGGS) ---
     for (const entry of gameState.leaderboard) {
         const li = document.createElement('li');
-        li.textContent = `${entry.name} - ${entry.score} points`;
+        li.textContent = `${entry.name} - ${entry.eggs} Golden Eggs`;
         leaderboardList.appendChild(li);
     }
 });

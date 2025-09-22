@@ -1,7 +1,11 @@
+@font-face {
+    font-family: 'HarryP';
+    src: url('HarryP-MVZ6w.ttf') format('truetype');
+}
 body {
-    font-family: 'Courier New', Courier, monospace;
+    font-family: 'HarryP', 'Courier New', Courier, monospace;
     background-color: #121212;
-    color: #fff;
+    color: #f1b544bb;
     margin: 0;
     overflow: hidden;
 }

@@ -16,6 +16,13 @@
         <div class="gate" data-level="5" style="top: 25%; left: 80%;"></div>
         <div id="path-animator"></div>
     </div>
+        <div id="name-modal-overlay"></div>
+        <div id="name-modal">
+        <h2 class="harry">Enter Your Wizard Name</h2>
+        <input type="text" id="player-name-input" placeholder="Enter your name...." maxlength="20">
+        <button id="submit-name-button">Begin</button>
+    </div>
+    <div id="map-container">
 
     <div id="video-container" class="hidden">
         <video id="gate-video" width="100%" height="100%">
@@ -25,7 +32,9 @@
 
     <main id="maze-container" class="hidden">
         <header>
-            <h1>Potter Nova: The Maze Challenge</h1>
+            <h1 class="harry">Potter Nova: The Maze Challenge</h1>
+            <div id="game-timer-display">Time Left: 10:00</div>
+            <div id="egg-display">Golden Eggs: 0</div>
         </header>
         <div id="maze-wrapper">
             <svg viewBox="0 0 1000 1000" width="1000" height="1000" role="img">
