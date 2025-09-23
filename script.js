@@ -3,7 +3,7 @@ import { randomInt, randomItemInArray, randomChance } from 'https://unpkg.com/ra
 // --- NEW WEBSOCKET ---
 // !! IMPORTANT !!
 // Change this to your server's REAL Wi-Fi IP Address
-const socket = io("http://172.17.178.140:3000"); 
+const socket = io("http://10.30.114.245:3000"); 
 
 // --- NEW MODAL LOGIC ---
 const nameModalOverlay = document.getElementById('name-modal-overlay');
