@@ -9,13 +9,15 @@ const socket = io("http://172.17.178.140:3000");
 const nameModalOverlay = document.getElementById('name-modal-overlay');
 const nameModal = document.getElementById('name-modal');
 const nameInput = document.getElementById('player-name-input');
+const teamInput = document.getElementById('team-name-input');
 const nameButton = document.getElementById('submit-name-button');
 
 nameButton.addEventListener('click', () => {
     const playerName = nameInput.value || "Nameless Wizard";
+    const teamName = teamInput.value || "No Team";
     
     // 1. Send the name to the server
-    socket.emit("joinGame", { name: playerName });
+    socket.emit("joinGame", { name: playerName, team: teamName });
     
     // 2. Hide the modal
     nameModal.style.display = 'none';

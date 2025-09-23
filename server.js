@@ -8,6 +8,7 @@ const app = express();
 app.use(cors()); // Allow connections from your game
 
 // --- FIX 1: This serves your HTML, CSS, and JS files ---
+// This line fixes your "TIMED_OUT" and "Cannot GET" errors
 app.use(express.static(__dirname)); 
 // ----------------------------------------------------
 
@@ -31,12 +32,13 @@ let hostSocketId = null;
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
 
-    // --- 1. Handle PLAYER joining ---
+    // --- 1. Handle PLAYER joining (NOW INCLUDES TEAM) ---
     socket.on('joinGame', (data) => {
-        console.log('Player joined:', data.name);
+        console.log(`Player joined: ${data.name} (Team: ${data.team})`);
         gameState.players[socket.id] = {
             id: socket.id,
             name: data.name,
+            team: data.team || "No Team", // NEW: Add team name
             level: 1, // All players start at level 1
             eggs: 0,  // All players start with 0 Golden Eggs
             currentMaze: "Hogwarts Map" // Set initial location
@@ -95,7 +97,11 @@ function updateLeaderboard() {
     // Sorts the leaderboard by Golden Eggs (most eggs wins)
     gameState.leaderboard = Object.values(gameState.players)
         .sort((a, b) => b.eggs - a.eggs) // Sort descending by eggs
-        .map(player => ({ name: player.name, eggs: player.eggs })); 
+        .map(player => ({ 
+            name: player.name, 
+            team: player.team, // NEW: Include team
+            eggs: player.eggs 
+        })); 
 }
 
 function broadcastToHost() {
