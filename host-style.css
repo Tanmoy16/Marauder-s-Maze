@@ -15,7 +15,7 @@ body {
     height: 100vh;
     /* Use your map image here! Make sure it's named main-map.jpg */
     background-image: url('map.jpg'); 
-    background-size: contain;
+    background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     position: relative;
