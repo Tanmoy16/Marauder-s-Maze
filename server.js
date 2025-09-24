@@ -52,6 +52,28 @@ io.on('connection', (socket) => {
         }
         updateLeaderboard();
         broadcastToHost();
+        
+        // Start the game if it hasn't started yet
+        if (!gameTimer) {
+            console.log('Game started!');
+            gameTimer = setInterval(() => {
+                let gameEnded = true;
+                for (const team in gameState.teams) {
+                    if (gameState.teams[team].timeLeft > 0) {
+                        gameState.teams[team].timeLeft--;
+                        gameEnded = false;
+                    }
+                }
+                updateLeaderboard();
+                broadcastToHost();
+
+                if (gameEnded) {
+                    clearInterval(gameTimer);
+                    gameTimer = null;
+                    io.emit('gameover', gameState.leaderboard);
+                }
+            }, 1000);
+        }
     });
 
     // --- 2. Handle HOST joining ---
@@ -83,30 +105,6 @@ io.on('connection', (socket) => {
             hostSocketId = null;
         }
     });
-
-    // --- 5. Start Game ---
-    socket.on('startGame', () => {
-        if (socket.id === hostSocketId && !gameTimer) {
-            console.log('Game started!');
-            gameTimer = setInterval(() => {
-                let gameEnded = true;
-                for (const team in gameState.teams) {
-                    if (gameState.teams[team].timeLeft > 0) {
-                        gameState.teams[team].timeLeft--;
-                        gameEnded = false;
-                    }
-                }
-                updateLeaderboard();
-                broadcastToHost();
-
-                if (gameEnded) {
-                    clearInterval(gameTimer);
-                    gameTimer = null;
-                    io.emit('gameover', gameState.leaderboard);
-                }
-            }, 1000);
-        }
-    });
 });
 
 // --- Helper Functions ---
@@ -131,4 +129,3 @@ const PORT = 3000;
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running! Find your Wi-Fi IP address with the 'ipconfig' command.`);
 });
-// ----------------------------------------

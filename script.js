@@ -61,12 +61,6 @@ let currentLevel = 1;
 const totalLevels = 5;
 let completedLevels = [];
 
-// --- NEW 10-MINUTE TIMER VARIABLES ---
-let gameStartTime; // The one and only start time (in ms)
-let globalTimerInterval; // The interval for the countdown
-const totalGameDuration = 10 * 60 * 1000; // 10 minutes in milliseconds
-// -------------------------------------
-
 const levelThemes = [
     { name: "Hogsmeade Railway Station", pathColor: '#CDBA96', backgroundImage: 'hogsmeade-bg.jpg' },
     { name: "The Whomping Willows",      pathColor: '#d4e025ff', backgroundImage: 'willow-bg.jpg' },
@@ -90,7 +84,6 @@ function initLevel(forceReset = false) {
     if (forceReset) {
         currentLevel = 1;
         completedLevels = [];
-        stopGlobalTimer();
         const timerElement = document.getElementById('game-timer-display');
         if(timerElement) {
             timerElement.textContent = `Time Left: 10:00`;
@@ -105,7 +98,6 @@ function initLevel(forceReset = false) {
         welcomeContainer.classList.remove('hidden');
         welcomeVideoElement.currentTime = 0;
         welcomeVideoElement.play().catch(e => console.error("Welcome video play failed:", e));
-        stopGlobalTimer(); // Game is over, stop the timer
     } else {
         mapContainer.classList.remove('hidden');
         updateMapMarkers();
@@ -145,59 +137,6 @@ function startMazeChallenge() {
     generateMazeData();
 }
 
-// --- NEW TIMER FUNCTIONS ---
-function formatTime(milliseconds) {
-    const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-}
-
-function stopGlobalTimer() {
-    clearInterval(globalTimerInterval);
-}
-
-function gameOver(message) {
-    stopGlobalTimer();
-    alert(message);
-    
-    // Send a "game over" time to the server (a very high number)
-    const finalTime = 99999;
-    socket.emit("mazeComplete", {
-        level: currentLevel,
-        time: finalTime 
-    });
-    
-    // Reset the game
-    initLevel(true); 
-}
-
-function startGlobalTimer() {
-    // Only start if it's not already running
-    if (gameStartTime) return; 
-
-    gameStartTime = Date.now();
-    const timerElement = document.getElementById('game-timer-display');
-    if (!timerElement) return;
-
-    globalTimerInterval = setInterval(() => {
-        const elapsed = Date.now() - gameStartTime;
-        const remaining = totalGameDuration - elapsed;
-
-        timerElement.textContent = `Time Left: ${formatTime(remaining)}`;
-
-        // Check for low time (last minute)
-        if (remaining <= 60 * 1000 && !timerElement.classList.contains('low-time')) {
-            timerElement.classList.add('low-time');
-        }
-
-        // Check for time's up
-        if (remaining <= 0) {
-            gameOver("Time's up! The magic has faded...");
-        }
-    }, 1000);
-}
-// --- END NEW TIMER FUNCTIONS ---
 
 // --- EVENT LISTENERS ---
 document.addEventListener('keydown', (e) => {
@@ -224,12 +163,6 @@ gateVideoElement.addEventListener('ended', () => {
     renderMazeFromData(); 
     initializeTurtle();
     
-    // --- NEW: Start global timer only on level 1 ---
-    if (currentLevel === 1) {
-        startGlobalTimer();
-    }
-    // ---------------------------------------------
-
     // Tell the server which maze this player is now in
     const theme = levelThemes[currentLevel - 1];
     socket.emit("playerUpdate", {
@@ -385,13 +318,12 @@ function moveTurtle(direction) {
         // --- WIN CONDITION ---
         if (turtle.x === endPoint.x && turtle.y === endPoint.y) {
             setTimeout(() => {
-                alert(`Level ${currentLevel} complete! You earned 100 Golden Eggs!`);
+                alert(`Level ${currentLevel} complete!`);
                 completedLevels.push(currentLevel);
                 const fromLevel = currentLevel;
                 currentLevel++; // Advance the level
                 
                 // --- NEW: Emit maze complete with new level ---
-                // The server will see this and give you 100 eggs
                 socket.emit("mazeComplete", {
                     newLevel: currentLevel // Send the *new* level they are on
                 });
