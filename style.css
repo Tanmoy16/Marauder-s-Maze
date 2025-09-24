@@ -246,10 +246,7 @@ svg {
     border-radius: 5px;
     margin-bottom: 10px;
 }
-#name-modal input#team-name-input {
-    border-color: #c0c0c0; /* Make it silver-ish */
-    color: #c0c0c0;
-}
+
 
 #name-modal button {
     font-family: 'Courier New', Courier, monospace;
