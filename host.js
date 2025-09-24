@@ -1,5 +1,5 @@
 // ---> IMPORTANT: REPLACE "localhost" with your computer's Wi-Fi IP address <---
-const socket = io("http://localhost:3000"); 
+const socket = io("http://172.17.178.140:3000"); 
 
 socket.on('connect', () => {
     console.log('Connected to server as host!');
