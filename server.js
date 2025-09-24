@@ -2,14 +2,14 @@ const express = require('express');
 const http = require('http');
 const { Server } = require("socket.io");
 const cors = require('cors');
-const path = require('path'); 
+const path = require('path');
 
 const app = express();
 app.use(cors()); // Allow connections from your game
 
 // --- FIX 1: This serves your HTML, CSS, and JS files ---
 // This line fixes your "TIMED_OUT" and "Cannot GET" errors
-app.use(express.static(__dirname)); 
+app.use(express.static(__dirname));
 // ----------------------------------------------------
 
 const server = http.createServer(app);
@@ -23,11 +23,13 @@ const io = new Server(server, {
 // This is the MASTER GAME STATE.
 let gameState = {
     players: {}, // Stores data for all 6 players
-    leaderboard: [] // Stores Golden Eggs
+    teams: {}, // Stores data for each team
+    leaderboard: [] // Stores team time left
 };
 
 // Store the host's unique socket ID
 let hostSocketId = null;
+let gameTimer = null;
 
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
@@ -40,9 +42,14 @@ io.on('connection', (socket) => {
             name: data.name,
             team: data.team || "No Team", // NEW: Add team name
             level: 1, // All players start at level 1
-            eggs: 0,  // All players start with 0 Golden Eggs
             currentMaze: "Hogwarts Map" // Set initial location
         };
+
+        if (!gameState.teams[data.team]) {
+            gameState.teams[data.team] = {
+                timeLeft: 600 // 10 minutes per team
+            };
+        }
         updateLeaderboard();
         broadcastToHost();
     });
@@ -57,26 +64,12 @@ io.on('connection', (socket) => {
     // --- 3. Handle Player Updates (for maze name) ---
     socket.on('playerUpdate', (data) => {
         if (gameState.players[socket.id]) {
-            gameState.players[socket.id].currentMaze = data.mazeName; 
+            gameState.players[socket.id].currentMaze = data.mazeName;
             broadcastToHost();
         }
     });
 
-    // --- 4. Handle Maze Completion (AWARDS GOLDEN EGGS) ---
-    socket.on('mazeComplete', (data) => {
-        if (gameState.players[socket.id]) {
-            const eggsToAward = 100; // REWARD for finishing a maze
-            gameState.players[socket.id].eggs += eggsToAward;
-            gameState.players[socket.id].level = data.newLevel; // Update their level
-            
-            console.log(`${gameState.players[socket.id].name} finished a maze! Total Eggs: ${gameState.players[socket.id].eggs}`);
-            
-            updateLeaderboard(); // Re-sort the leaderboard
-            broadcastToHost();
-        }
-    });
-
-    // --- 5. Handle Disconnects ---
+    // --- 4. Handle Disconnects ---
     socket.on('disconnect', () => {
         console.log('User disconnected:', socket.id);
         if (gameState.players[socket.id]) {
@@ -90,18 +83,41 @@ io.on('connection', (socket) => {
             hostSocketId = null;
         }
     });
+
+    // --- 5. Start Game ---
+    socket.on('startGame', () => {
+        if (socket.id === hostSocketId && !gameTimer) {
+            console.log('Game started!');
+            gameTimer = setInterval(() => {
+                let gameEnded = true;
+                for (const team in gameState.teams) {
+                    if (gameState.teams[team].timeLeft > 0) {
+                        gameState.teams[team].timeLeft--;
+                        gameEnded = false;
+                    }
+                }
+                updateLeaderboard();
+                broadcastToHost();
+
+                if (gameEnded) {
+                    clearInterval(gameTimer);
+                    gameTimer = null;
+                    io.emit('gameover', gameState.leaderboard);
+                }
+            }, 1000);
+        }
+    });
 });
 
 // --- Helper Functions ---
 function updateLeaderboard() {
-    // Sorts the leaderboard by Golden Eggs (most eggs wins)
-    gameState.leaderboard = Object.values(gameState.players)
-        .sort((a, b) => b.eggs - a.eggs) // Sort descending by eggs
-        .map(player => ({ 
-            name: player.name, 
-            team: player.team, // NEW: Include team
-            eggs: player.eggs 
-        })); 
+    // Sorts the leaderboard by time left (most time wins)
+    gameState.leaderboard = Object.entries(gameState.teams)
+        .map(([team, data]) => ({
+            team: team,
+            timeLeft: data.timeLeft
+        }))
+        .sort((a, b) => b.timeLeft - a.timeLeft); // Sort descending by time left
 }
 
 function broadcastToHost() {
