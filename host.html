@@ -2,43 +2,20 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Marauder's Maze - Host</title>
+    <title>Marauder's Map (Host Screen)</title>
     <link rel="stylesheet" href="host-style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Marauder's Maze - Host Dashboard</h1>
-        
-        <div class="controls">
-            <button id="startGameBtn">Start Game</button>
+    <div id="main-map-container">
         </div>
 
-        <div class="main-content">
-            <div class="player-status-container">
-                <h2>Player Status</h2>
-                <ul id="player-list">
-                    </ul>
-            </div>
-    
-            <div class="leaderboard-container">
-                <h2>Leaderboard</h2>
-                <table id="leaderboard">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Team</th>
-                            <th>Time Left</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        </tbody>
-                </table>
-            </div>
-        </div>
+    <div id="leaderboard">
+        <h1><b>Leaderboard<b></h1>
+        <ol id="leaderboard-list">
+            </ol>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.5/socket.io.js"></script>
     <script src="host.js"></script>
 </body>
 </html>
