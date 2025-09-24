@@ -16,7 +16,7 @@ const leaderboardList = document.getElementById('leaderboard-list');
 // --- Connect to Server as HOST ---
 // !! IMPORTANT !!
 // Change "YOUR_REAL_IP" to your computer's actual Wi-Fi IP address
-const socket = io("http://172.17.178.140:3000");
+const socket = io("http://172.17.215.114:3000");
 socket.emit("joinHost");
 
 // --- Listen for updates from the Server ---
